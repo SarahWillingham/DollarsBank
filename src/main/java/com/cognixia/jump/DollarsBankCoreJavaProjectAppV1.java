@@ -9,7 +9,12 @@ public class DollarsBankCoreJavaProjectAppV1 {
 
 	public static void main(String[] args) {
             
-            CustomerController.login();
+            CustomerController custControl = new CustomerController();
+            custControl.login();
+//            if(custControl.login() != null){
+//                custControl.menu();
+//            };
+            
             
 	}
 	

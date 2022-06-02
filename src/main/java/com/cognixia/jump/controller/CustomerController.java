@@ -3,6 +3,7 @@ package main.java.com.cognixia.jump.controller;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import main.java.com.cognixia.jump.model.Account;
 import main.java.com.cognixia.jump.model.Customer;
 
 public class CustomerController {
@@ -11,25 +12,25 @@ public class CustomerController {
 	    
 	// Declaring the color
 	// Custom declaration
-	final static String ANSI_RED = "\u001B[31m";
-        final static String ANSI_BLACK = "\u001B[30m";
-        final static String ANSI_GREEN = "\u001B[32m";
-        final static String ANSI_YELLOW = "\u001B[33m";
-        final static String ANSI_BLUE = "\u001B[34m";
-        final static String ANSI_PURPLE = "\u001B[35m";
-        final static String ANSI_CYAN = "\u001B[36m";
-        final static String ANSI_WHITE = "\u001B[37m";
+	final String ANSI_RED = "\u001B[31m";
+        final String ANSI_BLACK = "\u001B[30m";
+        final String ANSI_GREEN = "\u001B[32m";
+        final String ANSI_YELLOW = "\u001B[33m";
+        final String ANSI_BLUE = "\u001B[34m";
+        final String ANSI_PURPLE = "\u001B[35m";
+        final String ANSI_CYAN = "\u001B[36m";
+        final String ANSI_WHITE = "\u001B[37m";
 		
-//        private static String usernameInput = null;
-//        private static String passwordInput = null;
-	
-    public static void login() {
-        
+
         Customer sarah = new Customer("Sarah", "123");
         Customer fred = new Customer("Fred", "123");
         Customer james = new Customer("James", "123");
         
-        ArrayList<Customer> customers = new ArrayList<Customer>(Arrays.asList(sarah, fred, james));
+        Customer current = null;
+        
+        ArrayList<Customer> customers = new ArrayList<Customer>(Arrays.asList(sarah, fred, james));    
+	
+    public Customer login() {
         
         System.out.println(customers);
         
@@ -48,16 +49,54 @@ public class CustomerController {
             if(usernameInput.equals(customer.getUsername())){
                 if(passwordInput.equals(customer.getPassword())){
                     loginSuccess = true;
+                    current = customer;
                 }
             }
         }
         
         if(loginSuccess == true){
             System.out.println(ANSI_BLUE + "Login successful!" + ANSI_RESET);
+            menu();
         }else{
             System.out.println(ANSI_RED  + "Login failed!  Please try again" + ANSI_RESET);
             login();
         }
 
+        return current;
     }
+    
+    
+    public void menu(){
+        String choice;
+        String initialBalance;
+        
+        System.out.println("Select an option \n1. Create new account");
+        System.out.println("2. Check account status");
+        System.out.println("3. Make transaction");
+
+        Scanner sc = new Scanner(System.in);
+        choice = sc.next();
+        
+        //Double.parseDouble(choice);
+        if(Double.parseDouble(choice) == 1){
+            System.out.println("How much do you want to deposit?");
+            initialBalance = sc.next();
+            addNewAccount(current, Double.parseDouble(initialBalance));
+            System.out.println("New account added with balance: " + initialBalance);
+            System.out.println(current.getCustomerAccounts());
+        }else if(Double.parseDouble(choice) == 2){
+            System.out.println("Choose an account index");
+            System.out.println(current.getCustomerAccounts());
+        }else{
+            System.out.println("Invalid choice");
+        }
+    }
+    
+    
+    public void addNewAccount(Customer current, Double initialBalance){
+        
+        Account newAccount = new Account(initialBalance);
+        current.getCustomerAccounts().add(newAccount);
+    }
+    
 }

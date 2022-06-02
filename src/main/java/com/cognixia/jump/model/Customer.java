@@ -1,9 +1,12 @@
 package main.java.com.cognixia.jump.model;
 
+import java.util.ArrayList;
+
 public class Customer {
 
     private String username;
     private String password;
+    private ArrayList<Account> customerAccounts = new ArrayList<Account>();
 
     public Customer(String username, String password) {
         this.username = username;
@@ -26,10 +29,21 @@ public class Customer {
         this.password = password;
     }
 
+    public ArrayList<Account> getCustomerAccounts() {
+        return customerAccounts;
+    }
+
+    public void setCustomerAccounts(ArrayList<Account> customerAccounts) {
+        this.customerAccounts = customerAccounts;
+    }
+
     @Override
     public String toString() {
-        return "Customer{" + "username=" + username + ", password=" + password + '}';
+        return "Customer{" + "username=" + username + ", password=" + password + ", customerAccounts=" + customerAccounts + '}';
     }
+
+    
+
 	
     
     
