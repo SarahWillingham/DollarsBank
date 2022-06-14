@@ -6,12 +6,17 @@ public class Customer {
 
     private String username;
     private String password;
+    private String address;
+    private String phone;
     private ArrayList<Account> customerAccounts = new ArrayList<Account>();
 
-    public Customer(String username, String password) {
+    public Customer(String username, String password, String address, String phone) {
         this.username = username;
         this.password = password;
+        this.address = address;
+        this.phone = phone;
     }
+
 
     public String getUsername() {
         return username;
@@ -29,6 +34,22 @@ public class Customer {
         this.password = password;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+    
     public ArrayList<Account> getCustomerAccounts() {
         return customerAccounts;
     }
