@@ -4,9 +4,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 import main.java.com.cognixia.jump.model.Account;
-import main.java.com.cognixia.jump.model.Customer;
+import main.java.com.cognixia.jump.utility.ConnectionManager;
 
-public class CustomerController {
+import main.java.com.cognixia.jump.model.Customer;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+import java.util.Scanner;
+import main.java.com.cognixia.jump.model.Account1;
+import main.java.com.cognixia.jump.model.Customer1;
+
+
+public class CustomerController1 {
 
     final static String ANSI_RESET = "\u001B[0m";
 
@@ -20,31 +32,29 @@ public class CustomerController {
     final String ANSI_PURPLE = "\u001B[35m";
     final String ANSI_CYAN = "\u001B[36m";
     final String ANSI_WHITE = "\u001B[37m";
-
-
-    Customer sarah = new Customer("sarah", "123", "TX", "123456789");
-    Customer fred = new Customer("fred", "123", "PA", "987654321");
-    Customer james = new Customer("james", "123", "CA", "234567890");
-
     
-
-    Customer current = null;
-    
+    Connection conn = ConnectionManager.getConnection();
+    Customer1 current = null;
     Scanner sc = new Scanner(System.in);
-
-
-    ArrayList<Customer> customers = new ArrayList<Customer>(Arrays.asList(sarah, fred, james));    
-	
-    public void setup() {
-        Account account1 = new Account(sarah, 500.0, "checking");
-        Account account2 = new Account(sarah, 400.0, "checking");
-        Account account3 = new Account(sarah, 300.0, "savings");
-        sarah.getCustomerAccounts().add(account1);
-        sarah.getCustomerAccounts().add(account2);
-        sarah.getCustomerAccounts().add(account3);
+    PreparedStatement statement = null;
+    
+    
+    
+    public void start() throws SQLException {
+        System.out.println("Enter 'L' to login or 'R' to register a new user account.");
+        String choice = sc.next();
+        if(choice.equals("L") || choice.equals("l"))
+            login();
+        if(choice.equals("R") || choice.equals("r"))
+            register();
+        else{
+            System.out.println("Invalid input, try again.");
+            start();
+        }
     }
     
-    public void register(){
+    public void register() throws SQLException {
+        
         System.out.println("Enter new username:");
         String username = sc.next();
         System.out.println("Enter new password:");
@@ -54,55 +64,62 @@ public class CustomerController {
         System.out.println("Phone number:");
         String phone = sc.next();
         
-        Customer customer = new Customer(username, password, address, phone);
-        current = customer;
+        current = new Customer1(username);
+        statement = conn.prepareStatement("insert into customer values('" + username + "', '" + password + "', '" + address + "', '" + phone + "');");
+        statement.execute();
+
         if(current != null)
             System.out.println(ANSI_GREEN + "User successfully registered!" + ANSI_RESET);
         menu();
     }
     
-    public void login() {
-        
-        //System.out.println(customers);
-        
-        boolean loginSuccess = false;
+    public void login() throws SQLException {
+                
+        //boolean loginSuccess = false;
         
         String usernameInput = null;
 	String passwordInput = null;
         
-        //Scanner sc = new Scanner(System.in);
-        System.out.println(ANSI_PURPLE + "Please enter USERNAME or 'r' to register a new user account." + ANSI_RESET);
+        System.out.println(ANSI_PURPLE + "Please enter USERNAME." + ANSI_RESET);
         usernameInput = sc.next();
-        if(usernameInput.equals("r"))
-            register();
+
         System.out.println(ANSI_PURPLE + "Please enter password" + ANSI_RESET);
         passwordInput = sc.next();
             
-        for(Customer customer : customers){
-            if(usernameInput.equals(customer.getUsername())){
-                if(passwordInput.equals(customer.getPassword())){
-                    loginSuccess = true;
-                    current = customer;
-                }
-            }
-        }
-        
-        if(loginSuccess == true){
+        statement = conn.prepareStatement("Select * from customer where username = '" + usernameInput + "'and password = '" + passwordInput + "';");
+        ResultSet rs = statement.executeQuery();
+
+        if(rs.next()) {
             System.out.println(ANSI_GREEN + "Login successful!\n" + ANSI_RESET);
+            rs = statement.executeQuery();
+            current = new Customer1(usernameInput);
             summary();
-           // menu();
         }else{
             System.out.println(ANSI_RED  + "Login failed!  Please try again" + ANSI_RESET);
             login();
         }
     }
     
-    public void summary(){
-        for(int i = 0; i < current.getCustomerAccounts().size(); i++)
-            System.out.println(ANSI_BLUE + (i+1) + ": " + current.getCustomerAccounts().get(i).toString());
+    
+    
+    public void summary() throws SQLException{
+        statement = conn.prepareStatement("Select account_number, balance, type from account where customer_username = '" + current.getUsername() + "';");
+        ResultSet rs = current.getCustomerAccounts();
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columnsNumber = rsmd.getColumnCount();
+        while (rs.next()) {
+            for (int i = 1; i <= columnsNumber; i++) {
+                if (i > 1) System.out.print(",  ");
+                String columnValue = rs.getString(i);
+                System.out.print(columnValue + " " + rsmd.getColumnName(i));
+            }
+            System.out.println("");
+        }
         menu();
     }
-    public void menu(){
+    
+    
+    public void menu() throws SQLException{
         System.out.println("\n" + ANSI_PURPLE + "Select an option");
         System.out.println(ANSI_PURPLE + "1. Create new account");
         System.out.println(ANSI_PURPLE + "2. Recent account activity");
@@ -118,7 +135,6 @@ public class CustomerController {
             menu();
         }
         
-        //Double.parseDouble(choice);
         if(choice == 1){
             addNewAccount(current);
         }else if(choice == 2){
@@ -139,34 +155,37 @@ public class CustomerController {
     }
     
 
-    public void transfer(){
-        Account transferAccount;
-        Account depositAccount;
-        double transfer;
+    public void transfer() throws SQLException{
+        double transAccBal;
+        double depAccBal;
+        double transAmount;
         
-        for(int i = 0; i < current.getCustomerAccounts().size(); i++)
-            System.out.println(ANSI_BLUE + (i+1) + ": " + current.getCustomerAccounts().get(i).toString());
-        System.out.println(ANSI_PURPLE + "Select transfer account" + ANSI_RESET);
-       // int choice = Integer.parseInt(sc.next()) -1;
-        transferAccount = current.getCustomerAccounts().get(Integer.parseInt(sc.next()) -1);
-        System.out.println(ANSI_PURPLE + "Select deposit account" + ANSI_RESET);
-        depositAccount = current.getCustomerAccounts().get(Integer.parseInt(sc.next()) -1);
+//fix this so account balances are not null
+        summary();
+        System.out.println(ANSI_PURPLE + "Select transfer account number:" + ANSI_RESET);
+        int transAccId = Integer.parseInt(sc.next());
+        //transferAccount = current.getCustomerAccounts().get(Integer.parseInt(sc.next()) -1);
+        
+        System.out.println(ANSI_PURPLE + "Select deposit account number:" + ANSI_RESET);
+        int depAccId = Integer.parseInt(sc.next());
+        //depositAccount = current.getCustomerAccounts().get(Integer.parseInt(sc.next()) -1);
+        
         System.out.println("How much do you want to transfer?");
-        transfer = Double.parseDouble(sc.next());
+        transAmount = Double.parseDouble(sc.next());
         
-        if(transfer <= transferAccount.getBalance()){
-            transferAccount.setBalance(transferAccount.getBalance()-transfer);
-            depositAccount.setBalance(depositAccount.getBalance()+transfer);
-            transferAccount.getRecentTransactions().add(-transfer);
-            depositAccount.getRecentTransactions().add(transfer);
-            System.out.println("Transfer complete!");
-        }else{
-            System.out.println(ANSI_RED + "Insufficient funds!" + ANSI_RESET);
-        }
+//        if(transAmount <= transferAccount.getBalance()){
+//            transferAccount.setBalance(transferAccount.getBalance()-transAmount);
+//            depositAccount.setBalance(depositAccount.getBalance()+transAmount);
+//            transferAccount.getRecentTransactions().add(-transAmount);
+//            depositAccount.getRecentTransactions().add(transAmount);
+//            System.out.println("Transfer complete!");
+//        }else{
+//            System.out.println(ANSI_RED + "Insufficient funds!" + ANSI_RESET);
+//        }
         menu();
     }
 
-    public void customerInfo(Customer current){
+    public void customerInfo(Customer1 current) throws SQLException{
     
         System.out.println(ANSI_PURPLE + "Username:");
         System.out.println(ANSI_BLUE + current.getUsername());
@@ -183,27 +202,27 @@ public class CustomerController {
             summary();
     }
 
-    public void checkAccounts(Customer current){
-        if(current.getCustomerAccounts().size() == 0){
-            System.out.println(ANSI_BLUE + "You currently have no accounts.  Enter x to go back." + ANSI_RESET);
-            String choice = sc.next();
-            if(choice != null)
-                menu();
-        }
-        System.out.println(ANSI_PURPLE + "\nChoose an account number" + ANSI_RESET);
-        for(int i = 0; i < current.getCustomerAccounts().size(); i++)
-            System.out.println(ANSI_BLUE + (i+1) + ": " + current.getCustomerAccounts().get(i).toString() + ANSI_RESET);
-            //System.out.println(current.getCustomerAccounts());
-        System.out.println(ANSI_BLUE + (current.getCustomerAccounts().size() + 1) + ": Go back" + ANSI_RESET);
-        int choice = Integer.parseInt(sc.next());
-        if(choice > current.getCustomerAccounts().size() || choice < 1)
-            menu();
-        System.out.println(ANSI_BLUE + "Recent transactions:");
-        System.out.println(current.getCustomerAccounts().get(choice-1).getRecentTransactions() + ANSI_RESET);
-        menu();
-        //recentTransactions(choice);
-        
-    }
+//    public void checkAccounts(Customer1 current) throws SQLException{
+//        if(current.getCustomerAccounts().size() == 0){
+//            System.out.println(ANSI_BLUE + "You currently have no accounts.  Enter x to go back." + ANSI_RESET);
+//            String choice = sc.next();
+//            if(choice != null)
+//                menu();
+//        }
+//        System.out.println(ANSI_PURPLE + "\nChoose an account number" + ANSI_RESET);
+//        for(int i = 0; i < current.getCustomerAccounts().size(); i++)
+//            System.out.println(ANSI_BLUE + (i+1) + ": " + current.getCustomerAccounts().get(i).toString() + ANSI_RESET);
+//            //System.out.println(current.getCustomerAccounts());
+//        System.out.println(ANSI_BLUE + (current.getCustomerAccounts().size() + 1) + ": Go back" + ANSI_RESET);
+//        int choice = Integer.parseInt(sc.next());
+//        if(choice > current.getCustomerAccounts().size() || choice < 1)
+//            menu();
+//        System.out.println(ANSI_BLUE + "Recent transactions:");
+//        System.out.println(current.getCustomerAccounts().get(choice-1).getRecentTransactions() + ANSI_RESET);
+//        menu();
+//        //recentTransactions(choice);
+//        
+//    }
     
     
 //    public void recentTransactions(int accountNumber){
@@ -212,7 +231,7 @@ public class CustomerController {
 //    }
     
     
-    public void makeTransaction(Customer current){
+    public void makeTransaction(Customer1 current) throws SQLException{
         double transaction = 0;
         System.out.println("\n" + ANSI_PURPLE + "Choose an accout" + ANSI_RESET);
         
@@ -245,8 +264,8 @@ public class CustomerController {
         menu();
     }
     
-    public void addNewAccount(Customer current){
-        Scanner sc = new Scanner(System.in);
+    public void addNewAccount(Customer1 current) throws SQLException{
+        //Scanner sc = new Scanner(System.in);
         String type = null;
         
         System.out.println("\n");
@@ -261,19 +280,14 @@ public class CustomerController {
             System.out.println(ANSI_RED + "Invadid choice, please try again" + ANSI_RESET);
             addNewAccount(current);
         }
-        System.out.println(ANSI_PURPLE + "How much do you want to deposit?" + ANSI_RESET);
-        Double initialBalance = Double.parseDouble(sc.next());
+        System.out.println(ANSI_PURPLE + "How much do you want to deposit?" + ANSI_RESET);        
+        Account1 account = new Account1(current, type);
         
-        Account account = new Account(current, initialBalance, type);
-        //addNewAccount(current, initialBalance);
-        System.out.println(ANSI_BLUE + "New " + type + " account added with balance: " + initialBalance + ANSI_RESET);
-        
-        
-        //Account newAccount = new Account(current, initialBalance);
-        current.getCustomerAccounts().add(account);
-        //account.getRecentTransactions().add(initialBalance);
-        System.out.println(current.getCustomerAccounts());
-        menu();
+        statement = conn.prepareStatement("insert into account values(account_number, '" + current.getUsername() + "', 0.0, '" + type + "');");
+        statement.execute();
+        System.out.println(ANSI_BLUE + "New " + type + " account added with balance: $0" + ANSI_RESET);
+                    
+        summary();
     }
     
 }
