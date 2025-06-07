@@ -12,7 +12,6 @@ public class ConnectionManager {
     private static final String PASSWORD = "root";
 
     public static Connection getConnection(){
-        //Connection conn = null;
         try{
             Class.forName(mySqlJDBCDriver);
             conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
