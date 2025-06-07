@@ -1,13 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package main.java.com.cognixia.jump.model;
-
 import java.util.ArrayList;
-
-
 
 public class Account {
 
@@ -20,7 +12,7 @@ public class Account {
         this.customer = customer;
         this.type = type;
         this.balance = balance;
-        this.recentTransactions.add(balance);
+        this.recentTransactions.add(balance);   // first transaction
     }
 
     public String getType() {
