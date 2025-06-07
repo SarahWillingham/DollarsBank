@@ -52,12 +52,4 @@ public class Account {
         return "Account{" + "type=" + type + ", balance=" + balance + '}';
     }
 
-
-
-    
-    
-    
-
-
-    
 }
