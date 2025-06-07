@@ -26,6 +26,4 @@ public class Transaction {
         this.accountNumber = accountNumber;
     }
     
-    
-    
 }
