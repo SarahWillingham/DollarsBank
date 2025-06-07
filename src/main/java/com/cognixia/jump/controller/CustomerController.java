@@ -8,10 +8,9 @@ import main.java.com.cognixia.jump.model.Customer;
 
 public class CustomerController {
 
-    final static String ANSI_RESET = "\u001B[0m";
-
     // Declaring the color
     // Custom declaration
+    final static String ANSI_RESET = "\u001B[0m";
     final String ANSI_RED = "\u001B[31m";
     final String ANSI_BLACK = "\u001B[30m";
     final String ANSI_GREEN = "\u001B[32m";
@@ -21,20 +20,16 @@ public class CustomerController {
     final String ANSI_CYAN = "\u001B[36m";
     final String ANSI_WHITE = "\u001B[37m";
 
-
+	// create initial test customers
     Customer sarah = new Customer("sarah", "123", "TX", "123456789");
     Customer fred = new Customer("fred", "123", "PA", "987654321");
     Customer james = new Customer("james", "123", "CA", "234567890");
-
-    
-
     Customer current = null;
+    ArrayList<Customer> customers = new ArrayList<Customer>(Arrays.asList(sarah, fred, james));    
     
     Scanner sc = new Scanner(System.in);
 
-
-    ArrayList<Customer> customers = new ArrayList<Customer>(Arrays.asList(sarah, fred, james));    
-	
+	// create intial test accounts and add to customer
     public void setup() {
         Account account1 = new Account(sarah, 500.0, "checking");
         Account account2 = new Account(sarah, 400.0, "checking");
@@ -43,7 +38,8 @@ public class CustomerController {
         sarah.getCustomerAccounts().add(account2);
         sarah.getCustomerAccounts().add(account3);
     }
-    
+
+	// allow user to create new customer object with username/password and personal details
     public void register(){
         System.out.println("Enter new username:");
         String username = sc.next();
@@ -60,17 +56,13 @@ public class CustomerController {
             System.out.println(ANSI_GREEN + "User successfully registered!" + ANSI_RESET);
         menu();
     }
-    
+
+	
     public void login() {
-        
-        //System.out.println(customers);
-        
         boolean loginSuccess = false;
-        
         String usernameInput = null;
 	String passwordInput = null;
         
-        //Scanner sc = new Scanner(System.in);
         System.out.println(ANSI_PURPLE + "Please enter USERNAME or 'r' to register a new user account." + ANSI_RESET);
         usernameInput = sc.next();
         if(usernameInput.equals("r"))
@@ -90,18 +82,20 @@ public class CustomerController {
         if(loginSuccess == true){
             System.out.println(ANSI_GREEN + "Login successful!\n" + ANSI_RESET);
             summary();
-           // menu();
         }else{
             System.out.println(ANSI_RED  + "Login failed!  Please try again" + ANSI_RESET);
             login();
         }
     }
-    
+
+	
     public void summary(){
         for(int i = 0; i < current.getCustomerAccounts().size(); i++)
             System.out.println(ANSI_BLUE + (i+1) + ": " + current.getCustomerAccounts().get(i).toString());
         menu();
     }
+
+	
     public void menu(){
         System.out.println("\n" + ANSI_PURPLE + "Select an option");
         System.out.println(ANSI_PURPLE + "1. Create new account");
@@ -111,14 +105,12 @@ public class CustomerController {
         System.out.println(ANSI_PURPLE + "5. View customer information");
         System.out.println(ANSI_PURPLE + "6. Logout" + ANSI_RESET);
 
-        //Scanner sc = new Scanner(System.in);
         int choice = Integer.parseInt(sc.next());
         if(choice != 1 && choice != 2 && choice != 3 && choice != 4 && choice != 5 && choice != 6){
             System.out.println(ANSI_RED  + "Invalid choice, try again." + ANSI_RESET);
             menu();
         }
         
-        //Double.parseDouble(choice);
         if(choice == 1){
             addNewAccount(current);
         }else if(choice == 2){
@@ -147,7 +139,6 @@ public class CustomerController {
         for(int i = 0; i < current.getCustomerAccounts().size(); i++)
             System.out.println(ANSI_BLUE + (i+1) + ": " + current.getCustomerAccounts().get(i).toString());
         System.out.println(ANSI_PURPLE + "Select transfer account" + ANSI_RESET);
-       // int choice = Integer.parseInt(sc.next()) -1;
         transferAccount = current.getCustomerAccounts().get(Integer.parseInt(sc.next()) -1);
         System.out.println(ANSI_PURPLE + "Select deposit account" + ANSI_RESET);
         depositAccount = current.getCustomerAccounts().get(Integer.parseInt(sc.next()) -1);
@@ -166,8 +157,8 @@ public class CustomerController {
         menu();
     }
 
+	
     public void customerInfo(Customer current){
-    
         System.out.println(ANSI_PURPLE + "Username:");
         System.out.println(ANSI_BLUE + current.getUsername());
         System.out.println(ANSI_PURPLE + "Password:");
@@ -176,13 +167,13 @@ public class CustomerController {
         System.out.println(ANSI_BLUE + current.getAddress());
         System.out.println(ANSI_PURPLE + "Phone:");
         System.out.println(ANSI_BLUE + current.getPhone());
-        //summary();
         System.out.println("Enter any input to go back");
         String enter = sc.next();
         if(enter != null)
             summary();
     }
 
+	
     public void checkAccounts(Customer current){
         if(current.getCustomerAccounts().size() == 0){
             System.out.println(ANSI_BLUE + "You currently have no accounts.  Enter x to go back." + ANSI_RESET);
@@ -193,7 +184,6 @@ public class CustomerController {
         System.out.println(ANSI_PURPLE + "\nChoose an account number" + ANSI_RESET);
         for(int i = 0; i < current.getCustomerAccounts().size(); i++)
             System.out.println(ANSI_BLUE + (i+1) + ": " + current.getCustomerAccounts().get(i).toString() + ANSI_RESET);
-            //System.out.println(current.getCustomerAccounts());
         System.out.println(ANSI_BLUE + (current.getCustomerAccounts().size() + 1) + ": Go back" + ANSI_RESET);
         int choice = Integer.parseInt(sc.next());
         if(choice > current.getCustomerAccounts().size() || choice < 1)
@@ -201,15 +191,7 @@ public class CustomerController {
         System.out.println(ANSI_BLUE + "Recent transactions:");
         System.out.println(current.getCustomerAccounts().get(choice-1).getRecentTransactions() + ANSI_RESET);
         menu();
-        //recentTransactions(choice);
-        
     }
-    
-    
-//    public void recentTransactions(int accountNumber){
-//        System.out.println(current.getCustomerAccounts().get(accountNumber-1).getRecentTransactions());
-//        
-//    }
     
     
     public void makeTransaction(Customer current){
@@ -217,7 +199,6 @@ public class CustomerController {
         System.out.println("\n" + ANSI_PURPLE + "Choose an accout" + ANSI_RESET);
         
         for(int i = 0; i < current.getCustomerAccounts().size(); i++){
-            //System.out.println(i ": " + currentAccounts.get(i).getType() + " accout, balance: " + currentAccounts.get(i).getBalance());
             System.out.println(ANSI_BLUE + (i + 1) + ": " + current.getCustomerAccounts().get(i).toString() + ANSI_RESET);
         }
         
@@ -244,9 +225,9 @@ public class CustomerController {
         System.out.println(ANSI_BLUE + "Transaction successful!  New balance = " + currentAccount.getBalance());
         menu();
     }
-    
+
+	
     public void addNewAccount(Customer current){
-        Scanner sc = new Scanner(System.in);
         String type = null;
         
         System.out.println("\n");
@@ -265,13 +246,10 @@ public class CustomerController {
         Double initialBalance = Double.parseDouble(sc.next());
         
         Account account = new Account(current, initialBalance, type);
-        //addNewAccount(current, initialBalance);
         System.out.println(ANSI_BLUE + "New " + type + " account added with balance: " + initialBalance + ANSI_RESET);
         
         
-        //Account newAccount = new Account(current, initialBalance);
         current.getCustomerAccounts().add(account);
-        //account.getRecentTransactions().add(initialBalance);
         System.out.println(current.getCustomerAccounts());
         menu();
     }
