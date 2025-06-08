@@ -1,7 +1,6 @@
 package main.java.com.cognixia.jump.controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 import main.java.com.cognixia.jump.model.Account;
 import main.java.com.cognixia.jump.model.Customer;
