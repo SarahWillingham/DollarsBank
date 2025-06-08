@@ -1,10 +1,8 @@
 package main.java.com.cognixia.jump;
-import main.java.com.cognixia.jump.controller.CustomerController;
-import main.java.com.cognixia.jump.model.Customer;
-import java.util.ArrayList;
-import java.util.Arrays;
 
-public class DollarsBankCoreJavaProjectAppV1 {
+import main.java.com.cognixia.jump.controller.CustomerController;
+
+public class DollarsBankCoreJavaProjectApp {
 
 	public static void main(String[] args) {
             
